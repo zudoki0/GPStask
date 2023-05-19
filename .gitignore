@@ -9,6 +9,9 @@
 *.user
 *.userosscache
 *.sln.docstates
+2019-07.json
+2019-08.csv
+2019-09.bin
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
