@@ -97,6 +97,7 @@ namespace Histogram
                     Console.Write(" | " + dividedData[i]);
                     Console.WriteLine();
                 }
+                Console.WriteLine();
             } else
             {
                 Console.WriteLine(name);
@@ -128,12 +129,14 @@ namespace Histogram
 
                     index += 3;
                 }
-
+                
                 Console.SetCursorPosition(index, cursorY + height - 1);
                 Console.Write(0 + " hits");
                 Console.SetCursorPosition(index, cursorY);
                 Console.Write(max + " hits");
                 Console.SetCursorPosition(0, cursorY + height + 1);
+                Console.WriteLine();
+                
             }
         }
     }

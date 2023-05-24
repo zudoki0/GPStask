@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Globalization;
 
 namespace GPS
 {
@@ -55,7 +56,8 @@ namespace GPS
                     //IGNORE UNNECESSARY SYMBOLS
                     if (c != ':' && c != '[' && c != ']' && c != '{' && c != '}' && c != '"' && c != ',' && data.Count > 0)
                     {
-                        data[index] += c;
+                        if (c != 'T') data[index] += c;
+                        else data[index] += ' ';
                     }
                     //DON'T IGNORE ':' SYMBOL FOR DIFFER
                     if (c == ':' && inQuotes)
@@ -224,6 +226,61 @@ namespace GPS
                 }
             }
             return sat;
+        }
+    }
+    public class GPSDataAnalyzer
+    {
+        public static void AnalyzeGPS(List<GPS> data)
+        {
+            string[] formats = { "yyyy-MM-dd HH:mm:ss.fff", "yyyy-MM-dd HH:mm:ss" };
+            double minTime = 99999999;
+            double minDistance = 0;
+            int startPos=0, endPos=0;
+            double minTimeInHours = 0;
+            for (int i = 0; i < data.Count; i++)
+            {
+                double distance = 0;
+                for (int j = i; j < data.Count; j++)
+                {
+                    if (i == j) continue;
+                    distance += Geolocation.GeoCalculator.GetDistance(data[j].latitude, data[j].longitude, data[j - 1].latitude, data[j - 1].longitude, 2, Geolocation.DistanceUnit.Kilometers);
+                    if (distance >= 100)
+                    {
+                        double time = 0;
+                        double timeInHours = 0;
+                        foreach (string format in formats)
+                        {
+                            DateTime dateFrom;
+                            DateTime dateTo;
+                            if(DateTime.TryParseExact(data[i].gpsTime, format, System.Globalization.CultureInfo.InvariantCulture, DateTimeStyles.None, out dateFrom)
+                                &&
+                               DateTime.TryParseExact(data[j].gpsTime, format, System.Globalization.CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTo))
+                            {
+                                dateFrom = DateTime.ParseExact(data[i].gpsTime, format, System.Globalization.CultureInfo.InvariantCulture);
+                                dateTo = DateTime.ParseExact(data[j].gpsTime, format, System.Globalization.CultureInfo.InvariantCulture);
+                                time = (dateTo - dateFrom).TotalSeconds;
+                                timeInHours = (dateTo - dateFrom).TotalHours;
+                                break;
+                            }
+                        }
+                        if (time < minTime && time != 0)
+                        {
+                            startPos = i;
+                            endPos = j;
+                            minDistance = distance;
+                            minTime = time;
+                            minTimeInHours = timeInHours;
+                        }
+                        break;
+                    }
+                }
+            }
+            Console.WriteLine("Fastest road section of at least 100 km was driven over " + minTime.ToString("0.000") + "s and was " + minDistance.ToString("0.000") + "km long.");
+            Console.WriteLine("Start position " + data[startPos].latitude.ToString("0.0000000") + "; " + data[startPos].longitude.ToString("0.0000000"));
+            Console.WriteLine("Start gps time " + data[startPos].gpsTime);
+            Console.WriteLine("End   position " + data[endPos].latitude.ToString("0.0000000") + "; " + data[endPos].longitude.ToString("0.0000000"));
+            Console.WriteLine("End   gps time " + data[endPos].gpsTime);
+            Console.WriteLine("Average speed: " + Convert.ToDouble(minDistance / minTimeInHours).ToString("0.0") + "km/h");
         }
     }
 }
