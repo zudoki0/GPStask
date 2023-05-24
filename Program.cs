@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using GPS;
 
 public class Program
@@ -6,12 +7,13 @@ public class Program
     public static void Main()
     {
         List<GPS.GPS> data = GPSDataReader.readGPSJson("2019-07.json");
-        /*
-        List<GPS.GPS> data = GPSDataReader.readGPSCsv("2019-08.csv");
-        */
-        foreach(GPS.GPS gps in data)
-        {
-            Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}", gps.latitude, gps.longitude, gps.gpsTime, gps.speed, gps.angle, gps.altitude, gps.satellites);
-        }
+        Dictionary<int, int> sat = new Dictionary<int, int>();
+        sat = GPS.GPSDataReceiver.GetSatellites(data);
+        Histogram.Histogram hist = new Histogram.Histogram("Satellite histogram", 10, sat, 0);
+        sat = GPS.GPSDataReceiver.GetSpeed(data);
+        Histogram.Histogram hist2 = new Histogram.Histogram("Speed histogram", 10, sat, 10);
+        hist.drawHistogram();
+        Console.WriteLine();
+        hist2.drawHistogram();
     }
 }

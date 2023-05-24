@@ -128,4 +128,102 @@ namespace GPS
             return csvData;
         }
     }
+    public class GPSDataReceiver
+    {
+        public static Dictionary<double, int> GetLatitude(List<GPS> data)
+        {
+            Dictionary<double, int> sat = new Dictionary<double, int>();
+            foreach (GPS gps in data)
+            {
+                if(!sat.ContainsKey(gps.latitude))
+                {
+                    sat.Add(gps.latitude, 1);
+                } else
+                {
+                    sat[gps.latitude]++;
+                }
+            }
+            return sat;
+        }
+        public static Dictionary<double, int> GetLongitude(List<GPS> data)
+        {
+            Dictionary<double, int> sat = new Dictionary<double, int>();
+            foreach (GPS gps in data)
+            {
+                if (!sat.ContainsKey(gps.longitude))
+                {
+                    sat.Add(gps.longitude, 1);
+                }
+                else
+                {
+                    sat[gps.longitude]++;
+                }
+            }
+            return sat;
+        }
+        public static Dictionary<string, int> GPSTime(List<GPS> data)
+        {
+            Dictionary<string, int> sat = new Dictionary<string, int>();
+            foreach (GPS gps in data)
+            {
+                if (!sat.ContainsKey(gps.gpsTime))
+                {
+                    sat.Add(gps.gpsTime, 1);
+                }
+                else
+                {
+                    sat[gps.gpsTime]++;
+                }
+            }
+            return sat;
+        }
+        public static Dictionary<int, int> GetSpeed(List<GPS> data)
+        {
+            Dictionary<int, int> sat = new Dictionary<int, int>();
+            foreach (GPS gps in data)
+            {
+                if (!sat.ContainsKey(gps.speed))
+                {
+                    sat.Add(gps.speed, 1);
+                }
+                else
+                {
+                    sat[gps.speed]++;
+                }
+            }
+            return sat;
+        }
+        public static Dictionary<int, int> GetAltitude(List<GPS> data)
+        {
+            Dictionary<int, int> sat = new Dictionary<int, int>();
+            foreach (GPS gps in data)
+            {
+                if (!sat.ContainsKey(gps.altitude))
+                {
+                    sat.Add(gps.altitude, 1);
+                }
+                else
+                {
+                    sat[gps.altitude]++;
+                }
+            }
+            return sat;
+        }
+        public static Dictionary<int, int> GetSatellites(List<GPS> data)
+        {
+            Dictionary<int, int> sat = new Dictionary<int, int>();
+            foreach (GPS gps in data)
+            {
+                if (!sat.ContainsKey(gps.satellites))
+                {
+                    sat.Add(gps.satellites, 1);
+                }
+                else
+                {
+                    sat[gps.satellites]++;
+                }
+            }
+            return sat;
+        }
+    }
 }
