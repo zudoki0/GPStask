@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System.Collections;
+using System.Data;
 using System.Globalization;
+using System.Text;
 
 namespace GPS
 {
@@ -128,6 +130,99 @@ namespace GPS
                 Console.WriteLine("ERROR: Can't read the file on " + path);
             }
             return csvData;
+        }
+        public static List<GPS> readGPSBin(string path)
+        {
+            List<GPS>? binData = new List<GPS>();
+            try
+            {
+                int index = 0;
+                byte[] fileBytes = File.ReadAllBytes(path);
+                List<byte> tempArray = new List<byte>();
+                DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                
+                int lat = 0;
+                int lon = 0;
+                long gpsT = 0;
+                short spd = 0;
+                short agl = 0;
+                short alt = 0;
+                byte sat = 0;
+                List<string> data = new List<string>();
+
+                foreach (byte b in fileBytes)
+                {
+                    tempArray.Add(b);
+                    if(index == 3)
+                    {
+                        byte[] byteArray = tempArray.ToArray();
+                        Array.Reverse(byteArray);
+                        lat = BitConverter.ToInt32(byteArray, 0);
+                        tempArray.Clear();
+                    }
+                    else if (index == 7)
+                    {
+                        byte[] byteArray = tempArray.ToArray();
+                        Array.Reverse(byteArray);
+                        lon = BitConverter.ToInt32(byteArray, 0);
+                        tempArray.Clear();
+                    }
+                    else if (index == 15)
+                    {
+                        byte[] byteArray = tempArray.ToArray();
+                        Array.Reverse(byteArray);
+                        gpsT = BitConverter.ToInt64(byteArray, 0);
+                        tempArray.Clear();
+                    }
+                    else if (index == 17)
+                    {
+                        byte[] byteArray = tempArray.ToArray();
+                        Array.Reverse(byteArray);
+                        spd = BitConverter.ToInt16(byteArray, 0);
+                        tempArray.Clear();
+                    }
+                    else if (index == 19)
+                    {
+                        byte[] byteArray = tempArray.ToArray();
+                        Array.Reverse(byteArray);
+                        agl = BitConverter.ToInt16(byteArray, 0);
+                        tempArray.Clear();
+                    }
+                    else if (index == 21)
+                    {
+                        byte[] byteArray = tempArray.ToArray();
+                        Array.Reverse(byteArray);
+                        alt = BitConverter.ToInt16(byteArray, 0);
+                        tempArray.Clear();
+                    }
+                    else if (index == 22)
+                    {
+                        sat = b;
+                        DateTime tempDate = unixEpoch.AddMilliseconds(gpsT);
+                        GPS temp = new GPS
+                        (
+                            Convert.ToDouble(lat / 10000000),
+                            Convert.ToDouble(lon / 10000000),
+                            tempDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                            spd,
+                            agl,
+                            alt,
+                            sat
+                        );
+                        binData.Add(temp);
+                        index = -1;
+                        tempArray.Clear();
+                    }
+                    index++;
+                }
+                
+            }
+            catch
+            {
+                Console.WriteLine("ERROR: Can't read the file on " + path);
+            }
+
+            return binData;
         }
     }
     public class GPSDataReceiver
